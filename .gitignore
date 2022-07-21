@@ -130,3 +130,4 @@ dmypy.json
 start.bat
 start.sh
 .idea
+debug_log.txt
