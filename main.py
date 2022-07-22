@@ -1,7 +1,6 @@
 import os
 import json
 import pika
-import time
 
 from utils import get_logger
 from persistence import StorageSystem
@@ -79,7 +78,6 @@ class EventIndexer:
                 body
             ))
 
-        time.sleep(3)
         channel.basic_ack(delivery_tag=method_frame.delivery_tag)
 
 
