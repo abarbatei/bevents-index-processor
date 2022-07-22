@@ -4,6 +4,7 @@ import pika
 import time
 
 from utils import get_logger
+from persistence import StorageSystem
 
 
 class EventIndexer:
@@ -22,6 +23,7 @@ class EventIndexer:
         }
 
         self.connection = self._create_connection()
+        self.storage = StorageSystem(os.environ["MONGO_DB_CONNECTION_STRING"])
 
     def __del__(self):
         self.connection.close()
@@ -30,7 +32,8 @@ class EventIndexer:
         parameters = pika.ConnectionParameters(host=self.config['host'],
                                                port=self.config['port'],
                                                credentials=pika.PlainCredentials(self.config['user'],
-                                                                                 self.config['password']))
+                                                                                 self.config['password']),
+                                               heartbeat=0)
         return pika.BlockingConnection(parameters)
 
     def process(self):
@@ -60,9 +63,22 @@ class EventIndexer:
 
     def on_message_callback(self, channel, method_frame, header_frame, body):
         blockchain_event_data = json.loads(body)
-        self.logger.info("Received new message: {}".format(json.dumps(blockchain_event_data, indent=4)))
-        self.logger.info("Finished processing {} event, discarding from queue".format(
-            blockchain_event_data['event_name']))
+        event_name = blockchain_event_data['event_name']
+        tx_hash = blockchain_event_data['event_data']['transactionHash']
+        self.logger.info("Received new message: {}:{}".format(event_name, tx_hash))
+
+        try:
+            result = self.storage.insert_event(event_name, blockchain_event_data)
+            if not result:
+                self.logger.warning("Event {}:{} was discarded from storage".format(event_name, tx_hash))
+            else:
+                self.logger.info("Event {}:{} successfully saved to storage".format(event_name, tx_hash))
+            self.logger.info("Finished processing {} event, discarding from queue".format(event_name))
+        except Exception:
+            self.logger.exception("Problem inserting event data to database {}, discarding".format(
+                body
+            ))
+
         time.sleep(3)
         channel.basic_ack(delivery_tag=method_frame.delivery_tag)
 
