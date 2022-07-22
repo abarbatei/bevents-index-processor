@@ -110,12 +110,12 @@ Insertion is done in the `events` mongo database and `PairCreated` collection wi
 The collection has the following indexes:
 ```json
 {
-    '_id_': {'v': 2, 'key': [('_id', 1)]}, 
-    'process_time': {'v': 2, 'key': [('t', 1)], 'background': False}, 
-    'pair_address': {'v': 2, 'key': [('event_data.args.pair', 1)], 'background': False}, 
-    'contract_address': {'v': 2, 'key': [('event_data.address', 1)], 'background': False}, 
-    'tx_hash': {'v': 2, 'key': [('event_data.transactionHash', 1)], 'background': False}, 
-    'token0_address': {'v': 2, 'key': [('event_data.args.token0', 1)], 'background': False}, 
-    'token1_address': {'v': 2, 'key': [('event_data.args.token1', 1)], 'background': False}
+    "_id_": {"v": 2, "key": [("_id", 1)]}, 
+    "process_time": {"v": 2, "key": [("t", 1)], "background": False}, 
+    "pair_address": {"v": 2, "key": [("event_data.args.pair", 1)], "background": False}, 
+    "contract_address": {"v": 2, "key": [("event_data.address", 1)], "background": False}, 
+    "tx_hash": {"v": 2, "key": [("event_data.transactionHash", 1)], "background": False}, 
+    "token0_address": {"v": 2, "key": [("event_data.args.token0", 1)], "background": False}, 
+    "token1_address": {"v": 2, "key": [("event_data.args.token1", 1)], "background": False}
 }
 ```
