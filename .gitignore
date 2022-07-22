@@ -127,3 +127,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+start.bat
+start.sh
+.idea
+debug_log.txt
