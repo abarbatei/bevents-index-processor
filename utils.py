@@ -1,9 +1,7 @@
 import logging
 import sys
-import web3
-import json
-import requests
 
+from datetime import datetime, timezone
 from colorama import Fore, Style, init as colorama_init
 colorama_init()
 
@@ -52,3 +50,7 @@ def get_logger(name, file_name=None, use_file_logger=True):
     logger.addHandler(stdout_handler)
 
     return logger
+
+
+def get_utc_time_now() -> int:
+    return int(datetime.now(timezone.utc).timestamp())
