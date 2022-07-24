@@ -29,7 +29,7 @@ The `event_name` indicates what event type this is. As mentioned, only _PairCrea
 All other events are consumed/discarded from the queue with a warning message only.
 ![event discared example](res/event_discarded.PNG)
 
-## RabbitMQ interaction
+## RabbitMQ interaction and MongoDB connection string
 
 The project reads RabbitMQ messages sent to a topic exchange via a routing key. 
 In order to specify the queue/host and other configuration data, the following environment variables are required:
