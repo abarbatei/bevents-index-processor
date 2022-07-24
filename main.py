@@ -1,6 +1,8 @@
 import os
 import json
 import pika
+import pika.channel
+import pika.spec
 
 from utils import get_logger
 from persistence import StorageSystem
@@ -27,6 +29,10 @@ class EventIndexer:
         return pika.BlockingConnection(parameters)
 
     def process(self):
+        """
+        Starts the main logic of the message queue consumer. Will loop infinitely while verifying queue for new messages
+        :return: Nothing
+        """
         channel = self.connection.channel()
         channel.exchange_declare(exchange=self.config['exchange'],
                                  exchange_type='topic',
@@ -51,7 +57,21 @@ class EventIndexer:
         except KeyboardInterrupt:
             channel.stop_consuming()
 
-    def on_message_callback(self, channel, method_frame, header_frame, body):
+    def on_message_callback(self,
+                            channel: pika.channel.Channel,
+                            method_frame: pika.spec.Basic.Deliver,
+                            header_frame: pika.spec.BasicProperties,
+                            body: bytes) -> None:
+        """
+        Callback method that is executed whenever a message reaches the queue this system is subscribed to.
+        Parameters are those indicated in the official documentation
+        https://pika.readthedocs.io/en/stable/modules/channel.html#pika.channel.Channel.basic_consume
+        :param channel: MQ channel
+        :param method_frame: method frame
+        :param header_frame: message properties
+        :param body: the actual content/message, as bytes, that was received
+        :return: Nothing
+        """
         try:
             blockchain_event_data = json.loads(body)
             event_name = blockchain_event_data['event_name']
