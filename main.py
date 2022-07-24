@@ -16,6 +16,8 @@ class EventIndexer:
         self.config = rabbit_config
         self.connection = self._create_connection()
         self.storage = StorageSystem(mongo_connection_string)
+        self._is_test_run = False
+        self._consumer_tag = None
 
     def __del__(self):
         self.connection.close()
@@ -45,8 +47,8 @@ class EventIndexer:
         channel.queue_bind(queue=self.config['queue_name'],
                            exchange=self.config['exchange'],
                            routing_key=self.config['routing_key'])
-        channel.basic_consume(queue=self.config['queue_name'],
-                              on_message_callback=self.on_message_callback)
+        self._consumer_tag = channel.basic_consume(queue=self.config['queue_name'],
+                                                   on_message_callback=self.on_message_callback)
 
         self.logger.info('Listening for messages from {} (key: {}). To exit press CTRL+C'.format(
             self.config['queue_name'],
@@ -90,6 +92,10 @@ class EventIndexer:
             ))
 
         channel.basic_ack(delivery_tag=method_frame.delivery_tag)
+
+        if self._is_test_run:
+            self.logger.debug("Test run identified, ending")
+            channel.basic_cancel(self._consumer_tag)
 
 
 def main():
