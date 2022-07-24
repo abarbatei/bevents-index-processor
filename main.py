@@ -8,7 +8,7 @@ from persistence import StorageSystem
 
 class EventIndexer:
 
-    def __init__(self):
+    def __init__(self, rabbit_config, mongo_connection_string):
         self.logger = get_logger(self.__class__.__name__)
 
         self.config = {
@@ -27,7 +27,7 @@ class EventIndexer:
     def __del__(self):
         self.connection.close()
 
-    def _create_connection(self):
+    def _create_connection(self) -> pika.BlockingConnection:
         parameters = pika.ConnectionParameters(host=self.config['host'],
                                                port=self.config['port'],
                                                credentials=pika.PlainCredentials(self.config['user'],
@@ -61,12 +61,12 @@ class EventIndexer:
             channel.stop_consuming()
 
     def on_message_callback(self, channel, method_frame, header_frame, body):
-        blockchain_event_data = json.loads(body)
-        event_name = blockchain_event_data['event_name']
-        tx_hash = blockchain_event_data['event_data']['transactionHash']
-        self.logger.info("Received new message: {}:{}".format(event_name, tx_hash))
-
         try:
+            blockchain_event_data = json.loads(body)
+            event_name = blockchain_event_data['event_name']
+            tx_hash = blockchain_event_data['event_data']['transactionHash']
+            self.logger.info("Received new message: {}:{}".format(event_name, tx_hash))
+
             result = self.storage.insert_event(event_name, blockchain_event_data)
             if not result:
                 self.logger.warning("Event {}:{} was discarded from storage".format(event_name, tx_hash))
@@ -82,7 +82,19 @@ class EventIndexer:
 
 
 def main():
-    event_indexer = EventIndexer()
+    rabbit_config = {
+        "host": os.environ["RABBIT_HOST_URL"],
+        "port": int(os.environ["RABBIT_HOST_PORT"]),
+        "exchange": os.environ["RABBIT_EXCHANGE"],
+        "routing_key": os.environ["RABBIT_ROUTING_KEY"],
+        'queue_name': os.environ['RABBIT_QUEUE_NAME'],
+        "user": os.environ["RABBIT_USER"],
+        "password": os.environ["RABBIT_PASSWORD"]
+    }
+
+    mongo_connection_string = os.environ["MONGO_DB_CONNECTION_STRING"]
+
+    event_indexer = EventIndexer(rabbit_config, mongo_connection_string)
     event_indexer.process()
 
 
