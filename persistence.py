@@ -1,4 +1,5 @@
 from typing import Optional
+from copy import deepcopy
 import pymongo
 
 from utils import get_logger, get_utc_time_now
@@ -27,6 +28,7 @@ class StorageSystem:
             self.logger.debug("Discarded unsupported event {}".format(event_name))
             return None
 
-        message_data['t'] = get_utc_time_now()
-        insertion_result = self.events_db[event_name].insert_one(message_data)
+        document_data = deepcopy(message_data)
+        document_data['t'] = get_utc_time_now()
+        insertion_result = self.events_db[event_name].insert_one(document_data)
         return insertion_result.inserted_id
