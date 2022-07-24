@@ -8,21 +8,12 @@ from persistence import StorageSystem
 
 class EventIndexer:
 
-    def __init__(self, rabbit_config, mongo_connection_string):
+    def __init__(self, rabbit_config: dict, mongo_connection_string: str):
         self.logger = get_logger(self.__class__.__name__)
 
-        self.config = {
-            "host": os.environ["RABBIT_HOST_URL"],
-            "port": int(os.environ["RABBIT_HOST_PORT"]),
-            "exchange": os.environ["RABBIT_EXCHANGE"],
-            "routing_key": os.environ["RABBIT_ROUTING_KEY"],
-            'queue_name': os.environ['RABBIT_QUEUE_NAME'],
-            "user": os.environ["RABBIT_USER"],
-            "password": os.environ["RABBIT_PASSWORD"]
-        }
-
+        self.config = rabbit_config
         self.connection = self._create_connection()
-        self.storage = StorageSystem(os.environ["MONGO_DB_CONNECTION_STRING"])
+        self.storage = StorageSystem(mongo_connection_string)
 
     def __del__(self):
         self.connection.close()
