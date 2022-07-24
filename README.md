@@ -119,3 +119,19 @@ The collection has the following indexes:
     "token1_address": {"v": 2, "key": [("event_data.args.token1", 1)], "background": False}
 }
 ```
+## Extending and testing
+
+Extending the code is straightforward, clone, set it up and develop.
+Testing is done using pytest, install development requirements for full required packages
+`pip install -r requirements-dev.txt`
+
+In order to run tests a subset of connections needs to be passed for object initialisations. 
+Required configs are same as for the initial but with testing in (e.g. a local server).
+
+You can use the provided `start.bat` script if on Windows.
+Depending on your preferences, you can choose to create a testing queue for the RabbitMQ server
+or use a different server, the environment variables in the testing script allow this.
+
+However, for the database, it is currently set that you need to use a testing purposed data base, 
+the database/collection used by the script is not configurable at the moment.
+
