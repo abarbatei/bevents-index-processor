@@ -128,7 +128,7 @@ Testing is done using pytest, install development requirements for full required
 In order to run tests a subset of connections needs to be passed for object initialisations. 
 Required configs are same as for the initial but with testing in (e.g. a local server).
 
-You can use the provided `start.bat` script if on Windows.
+You can use the provided `runtests.bat` script if on Windows.
 Depending on your preferences, you can choose to create a testing queue for the RabbitMQ server
 or use a different server, the environment variables in the testing script allow this.
 
